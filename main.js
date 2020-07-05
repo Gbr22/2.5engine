@@ -4,6 +4,8 @@ let ctx = canvas.getContext("2d");
 
 let tileSize=30;
 
+let CIRCLE = 2*Math.PI;
+
 function drawLine(x1,y1,x2,y2){
     ctx.beginPath();
     ctx.moveTo(x1, y1);
@@ -25,10 +27,14 @@ function draw(){
                 "#fff"
             ];
             ctx.fillStyle = colors[t];
+            ctx.strokeStyle="#666";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x*tileSize, y*tileSize, tileSize, tileSize);
             ctx.fillRect(x*tileSize, y*tileSize, tileSize, tileSize);
         }
     }
     player.draw();
+    drawRays(player);
 }
 
 function calcDegOffset(rad){
@@ -37,6 +43,55 @@ function calcDegOffset(rad){
 
     return [x,y];
 }
+function normalize(val, max){
+    if (val > max){
+        return val - Math.floor(val/max)*max;
+    }
+    return val;
+}
+function drawRays(e){
+    
+    let [startx,starty] = e.getCenterPos();
+    let fov = 1;
+    for (let i=-fov/2; i < fov/2; i++){
+        let r = normalize(e.dir,CIRCLE) + DR*i;
+
+        let [x,y] = [startx,starty];
+        let hit = false;
+        let iter = 0;
+        let stepSize = tileSize/2;
+
+        let hx;
+        let hy;
+
+        while(!hit && iter < 25){
+            let [tx, ty] = [Math.floor(x/tileSize),Math.floor(y/tileSize)];
+
+            if (map[ty][tx] > 0){
+                hit = true;
+                hx = x;
+                hy = y;
+                break;
+            }
+
+            let [ox,oy] = calcDegOffset(r);
+
+            
+            
+
+            x+= ox*stepSize;
+            y+= oy*stepSize;
+
+            iter++;
+        }
+        if (hit){
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "#0f0";
+            drawLine(startx,starty,hx,hy);
+            /* console.log(startx,starty,hx,hy) */
+        }
+    }
+}
 
 class Player {
     x = 1;
@@ -44,6 +99,14 @@ class Player {
     width = 20;
     height = 20;
     dir = 0;
+
+    getCenterPos(){
+        let [dx,dy] = [this.x*tileSize,this.y*tileSize];
+        let [w,h] = [this.width, this.height]
+        let [cx,cy] = [dx+w/2,dy+h/2]
+        return [cx,cy];
+    }
+
     draw(){
         ctx.fillStyle="#f0f";
         let [dx,dy] = [this.x*tileSize,this.y*tileSize];
@@ -99,7 +162,7 @@ function calc(){
                     player.dir += turnspeed*DR;
                 },
             }
-            console.log(c);
+            //console.log(c);
             if (map[c]){
                 map[c]();
             }
@@ -114,8 +177,8 @@ function loop(){
     requestAnimationFrame(loop);
 }
 function resiz(){
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth*window.devicePixelRatio;
+    canvas.height = window.innerHeight*window.devicePixelRatio;
 }
 
 
@@ -137,6 +200,7 @@ function init(){
 init();
 
 
-function onresize(){
+window.onresize = function(){
+    console.log("resize");
     resiz();
 }
