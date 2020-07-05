@@ -246,6 +246,28 @@ class Player {
 let player = new Player();
 
 let keyMap = new Map();
+let mouseMap = new Map();
+let mouse = {
+    x:0,
+    y:0
+}
+onmousedown = function(e){
+    mouseMap.set(e.button,true);
+}
+onmouseup = function(e){
+    mouseMap.set(e.button,false);
+}
+onmousemove = function(e){
+    let dx = e.clientX - mouse.x;
+    let dy = e.clientY - mouse.y;
+
+    if (mouseMap.get(0)){
+        player.dir += DR*0.5*dx;
+    }
+
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+}
 
 onkeyup = function(e){
     keyMap.set(e.keyCode,false);
