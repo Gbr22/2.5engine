@@ -44,11 +44,27 @@ function calcDegOffset(rad){
     return [x,y];
 }
 function normalize(val, max){
-    if (val > max){
+    
+    if (val > max || val < 0){
         return val - Math.floor(val/max)*max;
     }
+    if (val < 0){
+        val = max-val;
+    }
+    
     return val;
 }
+class _Map {
+    get(x,y){
+        if (map[y]){
+            return map[y][x] || 0;
+        } else {
+            return 0;
+        }
+    }
+}
+let GameMap = new _Map();
+
 function drawRays(e){
     
     let [startx,starty] = e.getCenterPos();
@@ -59,28 +75,56 @@ function drawRays(e){
         let [x,y] = [startx,starty];
         let hit = false;
         let iter = 0;
-        let stepSize = tileSize/2;
+        let stepSize = tileSize;
 
         let hx;
         let hy;
 
         while(!hit && iter < 25){
-            let [tx, ty] = [Math.floor(x/tileSize),Math.floor(y/tileSize)];
+            var [tx, ty] = [Math.floor(x/tileSize),Math.floor(y/tileSize)];
 
-            if (map[ty][tx] > 0){
+            
+
+            let [ox,oy] = calcDegOffset(r);
+
+            /* circle
+               __
+             /    \
+        PI->|      | <-0
+             \ __ /
+
+            */
+
+            
+            
+            let [Tx,Ty] = [Math.floor(x/tileSize)*tileSize, Math.floor(y/tileSize)*tileSize];
+            let [rx,ry] = [x-Tx,y-Ty];
+
+            
+            let minadd = 0.1;
+            x-= minadd;
+            y-=minadd;
+
+            if (r > Math.PI || r < Math.PI){ //up
+                let d = r > Math.PI ? 1 : -1;
+
+                let pointToLineDist = r > Math.PI ? ry : tileSize-ry;
+                let otherDist = (1/Math.tan(r))*pointToLineDist;                
+
+                let dy = y-(pointToLineDist*d);
+                let dx = x-(otherDist*d);
+
+                x=dx;
+                y=dy-(minadd*d);
+            }
+            var [tx, ty] = [Math.floor(x/tileSize),Math.floor(y/tileSize)];
+            if (GameMap.get(tx,ty) > 0){
                 hit = true;
                 hx = x;
                 hy = y;
                 break;
             }
-
-            let [ox,oy] = calcDegOffset(r);
-
             
-            
-
-            x+= ox*stepSize;
-            y+= oy*stepSize;
 
             iter++;
         }
@@ -94,11 +138,11 @@ function drawRays(e){
 }
 
 class Player {
-    x = 1;
-    y = 1;
+    x = 3;
+    y = 5;
     width = 20;
     height = 20;
-    dir = 0;
+    dir = -Math.PI/2;
 
     getCenterPos(){
         let [dx,dy] = [this.x*tileSize,this.y*tileSize];
