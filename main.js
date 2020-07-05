@@ -66,10 +66,9 @@ class _Map {
 let GameMap = new _Map();
 
 function drawRays(e){
-    
     let [startx,starty] = e.getCenterPos();
     let fov = 90;
-    for (let i=-fov/2; i < fov/2; i++){
+    for (let i=-fov/2; i < fov/2; i+=0.5){
         function rayCast(horizontal){
             let r = normalize(e.dir,CIRCLE) + DR*i;
 
@@ -181,6 +180,28 @@ function drawRays(e){
             let hit = calcDistance(horizontal) < calcDistance(vertical) ? horizontal : vertical;
             ctx.lineWidth = 1;
             ctx.strokeStyle = "#0f0";
+
+            let angleDiff = Math.abs(DR*i);
+
+            let dist = calcDistance(hit)*Math.cos(angleDiff);
+
+            let isHorizontal = hit == horizontal;
+
+            let screenHeight = 320;
+            let screenWidth = 500;
+            let lineH = tileSize*screenHeight/dist;
+            let lineW = screenWidth/fov;
+            if (lineH > screenHeight){
+                lineH = screenHeight;
+            }
+            let screenX = 500;
+            let screenY = 0;
+
+
+            /* ctx.fillRect(screenX,screenY,screenWidth,screenHeight); */
+            ctx.fillStyle = isHorizontal ? "#99ccff" : "#66b3ff";
+            ctx.fillRect(screenX+lineW*(i+fov/2),screenY+screenHeight/2-lineH/2,lineW,lineH);
+
             drawLine(startx,starty,hit.x,hit.y);
         }
 
