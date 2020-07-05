@@ -68,89 +68,123 @@ let GameMap = new _Map();
 function drawRays(e){
     
     let [startx,starty] = e.getCenterPos();
-    let fov = 1;
+    let fov = 90;
     for (let i=-fov/2; i < fov/2; i++){
-        let r = normalize(e.dir,CIRCLE) + DR*i;
+        function rayCast(horizontal){
+            let r = normalize(e.dir,CIRCLE) + DR*i;
 
-        let [x,y] = [startx,starty];
-        let hit = false;
-        let iter = 0;
-        let stepSize = tileSize;
+            let [x,y] = [startx,starty];
+            let hit = false;
+            let iter = 0;
+            let stepSize = tileSize;
 
-        let hx;
-        let hy;
+            let hx;
+            let hy;
 
-        while(!hit && iter < 25){
-            var [tx, ty] = [Math.floor(x/tileSize),Math.floor(y/tileSize)];
+            while(!hit && iter < 25){
+                var [tx, ty] = [Math.floor(x/tileSize),Math.floor(y/tileSize)];
 
-            
+                let [ox,oy] = calcDegOffset(r);
 
-            let [ox,oy] = calcDegOffset(r);
+                /* circle
+                __
+                /    \
+            PI->|      | <-0
+                \ __ /
 
-            /* circle
-               __
-             /    \
-        PI->|      | <-0
-             \ __ /
+                */
+                
+                
+                let [Tx,Ty] = [Math.floor(x/tileSize)*tileSize, Math.floor(y/tileSize)*tileSize];
+                let [rx,ry] = [x-Tx,y-Ty];
 
-            */
+                
+                let minadd = 0.1;
+                x-= minadd;
+                y-=minadd;
 
-            
-            
-            let [Tx,Ty] = [Math.floor(x/tileSize)*tileSize, Math.floor(y/tileSize)*tileSize];
-            let [rx,ry] = [x-Tx,y-Ty];
+                let tau = Math.PI/2;
+                let _3P2 = 3*Math.PI/2;
 
-            
-            let minadd = 0.1;
-            x-= minadd;
-            y-=minadd;
+                let hits = [];
 
-            let tau = Math.PI/2;
-            let _3P2 = 3*Math.PI/2;
+                if (r != 0 && r != Math.PI && horizontal){ //up down
+                    let d = r > Math.PI ? 1 : -1;
 
-            let hits = [];
+                    let pointToLineDist = r > Math.PI ? ry : tileSize-ry;
+                    let otherDist = (1/Math.tan(r))*pointToLineDist;                
 
-            /* if (r != 0 && r != Math.PI){ //up down
-                let d = r > Math.PI ? 1 : -1;
+                    let dy = y-(pointToLineDist*d);
+                    let dx = x-(otherDist*d);
 
-                let pointToLineDist = r > Math.PI ? ry : tileSize-ry;
-                let otherDist = (1/Math.tan(r))*pointToLineDist;                
+                    x=dx;
+                    y=dy-(minadd*d);
+                }
+                if (r != 0 && r != Math.PI && !horizontal){ //left right
+                    let d = 0;
+                    if (r>tau && r<_3P2){
+                        d=1;
+                    } else if (r<tau || r > _3P2){
+                        d=-1;
+                    }
 
-                let dy = y-(pointToLineDist*d);
-                let dx = x-(otherDist*d);
 
-                x=dx;
-                y=dy-(minadd*d);
-            } */
-            if (r != 0 && r != Math.PI){ //left right
-                let d = r>tau && r<_3P2 ? 1 : -1;
+                    let pointToLineDist = (r>tau && r<_3P2) ? rx : tileSize-rx;
+                    let otherDist = (Math.tan(r))*pointToLineDist;
 
-                let pointToLineDist = (r>tau && r<_3P2) ? rx : tileSize-rx;
-                let otherDist = (Math.tan(r))*pointToLineDist;
+                    let dx = x-(pointToLineDist*d);
+                    let dy = y-(otherDist*d);
 
-                let dx = x-(pointToLineDist*d);
-                let dy = y-(otherDist*d);
+                    x=dx-(minadd*d);
+                    y=dy;
+                }
+                var [tx, ty] = [Math.floor(x/tileSize),Math.floor(y/tileSize)];
+                if (GameMap.get(tx,ty) > 0){
+                    hit = true;
+                    hx = x;
+                    hy = y;
+                    break;
+                }
+                
 
-                x=dx-(minadd*d);
-                y=dy;
+                iter++;
             }
-            var [tx, ty] = [Math.floor(x/tileSize),Math.floor(y/tileSize)];
-            if (GameMap.get(tx,ty) > 0){
-                hit = true;
-                hx = x;
-                hy = y;
-                break;
+            if (hit){
+                return {
+                    x:hx,
+                    y:hy,
+                }
             }
-            
-
-            iter++;
         }
-        if (hit){
+        let horizontal = rayCast(true);
+        let vertical = rayCast(false);
+
+        function calcDistance(hit){
+            if (hit == undefined){
+                return Infinity;
+            }
+
+            function diff(a,b){
+                a = Math.abs(a);
+                b = Math.abs(b);
+                return a > b ? a-b : b-a;
+            }
+            let {x,y} = hit;
+            let xDiff = diff(startx,x);
+            let yDiff = diff(starty,y);
+            let d = Math.sqrt(Math.pow(xDiff,2),Math.pow(yDiff),2);
+            return d;
+        }
+        if (horizontal == undefined && vertical == undefined){
+
+        } else {
+            let hit = calcDistance(horizontal) < calcDistance(vertical) ? horizontal : vertical;
             ctx.lineWidth = 1;
             ctx.strokeStyle = "#0f0";
-            drawLine(startx,starty,hx,hy);
-            /* console.log(startx,starty,hx,hy) */
+            drawLine(startx,starty,hit.x,hit.y);
         }
+
+
     }
 }
 
