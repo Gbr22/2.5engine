@@ -207,6 +207,7 @@ function drawRays(e){
 
             let tile = GameMap.get(Math.floor(hit.x/tileSize), Math.floor(hit.y/tileSize));
 
+            
             /* ctx.fillRect(screenX,screenY,screenWidth,screenHeight); */
             let h=180,s=0.5,l=0.5;
             ctx.fillStyle = getColor(tile);
@@ -214,6 +215,10 @@ function drawRays(e){
             ctx.fillRect(screenX+lineW*(i+fov/2),screenY+screenHeight/2-lineH/2,lineW,lineH);
 
             drawLine(startx,starty,hit.x,hit.y);
+
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = "#6600ff";
+            ctx.strokeRect(hit.x,hit.y,0.01,0.01);
         }
 
 
