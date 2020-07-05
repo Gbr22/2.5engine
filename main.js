@@ -105,7 +105,12 @@ function drawRays(e){
             x-= minadd;
             y-=minadd;
 
-            if (r > Math.PI || r < Math.PI){ //up
+            let tau = Math.PI/2;
+            let _3P2 = 3*Math.PI/2;
+
+            let hits = [];
+
+            /* if (r != 0 && r != Math.PI){ //up down
                 let d = r > Math.PI ? 1 : -1;
 
                 let pointToLineDist = r > Math.PI ? ry : tileSize-ry;
@@ -116,6 +121,18 @@ function drawRays(e){
 
                 x=dx;
                 y=dy-(minadd*d);
+            } */
+            if (r != 0 && r != Math.PI){ //left right
+                let d = r>tau && r<_3P2 ? 1 : -1;
+
+                let pointToLineDist = (r>tau && r<_3P2) ? rx : tileSize-rx;
+                let otherDist = (Math.tan(r))*pointToLineDist;
+
+                let dx = x-(pointToLineDist*d);
+                let dy = y-(otherDist*d);
+
+                x=dx-(minadd*d);
+                y=dy;
             }
             var [tx, ty] = [Math.floor(x/tileSize),Math.floor(y/tileSize)];
             if (GameMap.get(tx,ty) > 0){
