@@ -67,7 +67,7 @@ let GameMap = new _Map();
 
 function drawRays(e){
     let [startx,starty] = e.getCenterPos();
-    let fov = 90;
+    let fov = 60;
     for (let i=-fov/2; i < fov/2; i+=0.5){
         function rayCast(horizontal){
             let r = normalize(e.dir,CIRCLE) + DR*i;
@@ -210,8 +210,8 @@ function drawRays(e){
 }
 
 class Player {
-    x = 3;
-    y = 5;
+    x = 6.1;
+    y = 6.1;
     width = 20;
     height = 20;
     dir = -Math.PI/2;
@@ -299,11 +299,11 @@ function resiz(){
 
 
 let map = [
-    [1,1,1,1,1,1,1,1],
+    [1,1,1,1,1,1,0,1],
     [1,0,0,0,0,0,0,1],
-    [1,1,1,0,0,1,0,1],
-    [1,0,0,0,0,1,0,1],
-    [1,0,0,0,1,1,0,1],
+    [1,1,1,0,0,1,0,0],
+    [1,0,0,0,0,1,0,0],
+    [1,0,0,0,1,0,0,1],
     [1,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,1],
     [1,1,1,1,1,1,1,1],
