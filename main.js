@@ -164,9 +164,9 @@ function drawRays(e){
             }
 
             function diff(a,b){
-                a = Math.abs(a);
-                b = Math.abs(b);
-                return a > b ? a-b : b-a;
+                a = a;
+                b = b;
+                return Math.abs(a > b ? a-b : b-a);
             }
             let {x,y} = hit;
             let xDiff = diff(startx,x);
@@ -187,7 +187,7 @@ function drawRays(e){
 
             let isHorizontal = hit == horizontal;
 
-            let screenHeight = 320;
+            let screenHeight = 350;
             let screenWidth = 480;
             let lineH = tileSize*screenHeight/dist;
             let lineW = screenWidth/fov;
@@ -212,8 +212,8 @@ function drawRays(e){
 }
 
 class Player {
-    x = 6.1;
-    y = 6.1;
+    x = 4.1;
+    y = 4.1;
     width = 20;
     height = 20;
     dir = -Math.PI/2;
@@ -286,6 +286,7 @@ function calc(){
             let c = String.fromCharCode(k).toLowerCase();
             let turnspeed = 5;
             let [ox,oy] = calcDegOffset(player.dir);
+            let [rox, roy] = calcDegOffset(player.dir-Math.PI/2);
             let map = {
                 "w":()=>{
                     player.x += ox*1/player.speed;
@@ -296,10 +297,12 @@ function calc(){
                     player.y -= oy*1/player.speed;
                 },
                 "a":()=>{
-                    player.dir -= turnspeed*DR;
+                    player.x += rox*1/player.speed;
+                    player.y += roy*1/player.speed;
                 },
                 "d":()=>{
-                    player.dir += turnspeed*DR;
+                    player.x -= rox*1/player.speed;
+                    player.y -= roy*1/player.speed;
                 },
             }
             //console.log(c);
@@ -323,15 +326,27 @@ function resiz(){
 
 
 let map = [
-    [1,1,1,1,1,1,0,1],
-    [1,0,0,0,0,0,0,1],
-    [1,1,1,0,0,1,0,0],
-    [1,0,0,0,0,1,0,0],
-    [1,0,0,0,1,0,0,1],
-    [1,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,1],
-    [1,1,1,1,1,1,1,1],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,1,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
 ]
+for (let y=0; y < map.length; y++){
+    for (let x=0; x < map[y].length; x++){
+        if (y == 0 || y == map.length-1){
+            map[y] = new Array(map[y].length).fill(1);
+        }
+        if (x == 0 || x == map[y].length-1){
+            map[y][x] = 1;
+        }
+        
+    }
+}
+
 
 function init(){
     resiz();
