@@ -79,14 +79,14 @@ class _Map {
 let GameMap = new _Map();
 
 function getColor(tile){
-    return colors[tile] || "yellow";
+    return colors[tile] || "#cc0099";
 }
 var colors = [
-    "#000",
-    "red",
-    "green",
-    "blue",
-    "white"
+    "#000000",
+    "#ff0000",
+    "#008000",
+    "#0000ff",
+    "#ffffff"
 ];
 let fov = 60;
 let rayMultiplier = 1;
@@ -240,8 +240,17 @@ function drawRays(e){
 
             
             /* ctx.fillRect(screenX,screenY,screenWidth,screenHeight); */
-            let h=180,s=0.5,l=0.5;
-            ctx.fillStyle = getColor(tile);
+            let color = getColor(tile);
+            
+            color = hexToRgb(color);
+            
+            color = rgbToHsl(...color);
+
+            if (hit == horizontal){
+                color[2] *= 0.8;
+            }
+            
+            ctx.fillStyle = `hsl(${color[0]*360}deg, ${color[1]*100}%, ${color[2]*100}%)`;
             
             ctx.fillRect(screenX+8*(i+fov/2),screenHeight/2-lineH/2,8,lineH);
             /* ctx.fillStyle = "#666";
