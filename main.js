@@ -275,19 +275,31 @@ let keyMap = new Map();
 let mouseMap = new Map();
 let mouse = {
     x:0,
-    y:0
+    y:0,
+    locked:false,
 }
 onmousedown = function(e){
+    canvas.requestPointerLock();
     mouseMap.set(e.button,true);
 }
 onmouseup = function(e){
     mouseMap.set(e.button,false);
 }
+document.addEventListener('pointerlockchange', lockChangeAlert, false);
+function lockChangeAlert() {
+    if (document.pointerLockElement === canvas) {
+        mouse.locked = true;
+    } else {
+        mouse.locked = false;
+    }
+}
 onmousemove = function(e){
-    let dx = e.clientX - mouse.x;
-    let dy = e.clientY - mouse.y;
+    /* let dx = e.clientX - mouse.x;
+    let dy = e.clientY - mouse.y; */
+    let dx = e.movementX;
+    let dy = e.movementY;
 
-    if (mouseMap.get(0)){
+    if (mouse.locked){
         player.dir += DR*0.5*dx;
     }
 
