@@ -2,7 +2,7 @@ let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 
 
-let tileSize=30;
+let tileSize=15;
 
 let CIRCLE = 2*Math.PI;
 
@@ -204,11 +204,11 @@ function drawRays(e){
 
             let isHorizontal = hit == horizontal;
 
-            let screenHeight = 350;
+            let screenHeight = 480;
             let screenWidth = 480;
             let maxLineHeight = screenHeight;
             let lH = screenHeight;
-            let lineH = Math.min((36*maxLineHeight)/dist, maxLineHeight);
+            let lineH = Math.min((tileSize*maxLineHeight)/dist, maxLineHeight);
             let lineW = screenWidth/fov;
             if (lineH > screenHeight){
                 lineH = screenHeight;
