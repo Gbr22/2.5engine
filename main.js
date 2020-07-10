@@ -43,6 +43,7 @@ function draw3d(){
         ctx.strokeRect(hit.x*minimapSize,hit.y*minimapSize,0.01,0.01);
     }
 }
+let fps = [];
 let minimapSize = 1/10;
 function draw(){
     ctx.fillStyle="#000";
@@ -72,8 +73,15 @@ function draw(){
     }
     player.draw();
 
-
-    
+    let fontSize = 30;
+    ctx.font = `${fontSize}px Arial`;
+    ctx.fillStyle = "yellow";
+    let sum = 0;
+    for (let e of fps){
+        sum+=e;
+    }
+    let avgfps = sum/fps.length;
+    ctx.fillText(Math.floor(avgfps),0,fontSize);
 }
 
 function calcDegOffset(rad){
@@ -455,8 +463,13 @@ function calc(){
 }
 
 function loop(){
-    draw();
+    let start = Date.now();
     calc();
+    draw();
+    fps.push(1/((Date.now()-start)/1000));
+    if (fps.length > 10){
+        fps.shift();
+    }
     requestAnimationFrame(loop);
 }
 function resiz(){
