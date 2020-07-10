@@ -266,10 +266,10 @@ function drawRays(e){
             
             color = rgbToHsl(...color);
 
-            if (hit == horizontal){
+            /* if (hit == horizontal){
                 color[2] *= 0.8;
             }
-            
+             */
             
             
             let [sx,sy] = [screenX+lineW*(i+fov/2), screenHeight/2-lineH/2];
@@ -289,6 +289,10 @@ function drawRays(e){
                 ctx.drawImage(img,sourceX,0, sliceW,img.height, sx,sy,drawW,drawH);
             } else {
                 ctx.fillStyle = `hsl(${color[0]*360}deg, ${color[1]*100}%, ${color[2]*100}%)`;
+                ctx.fillRect(sx,sy,drawW,drawH);
+            }
+            if (hit == horizontal){
+                ctx.fillStyle = "rgba(0,0,0,0.2)";
                 ctx.fillRect(sx,sy,drawW,drawH);
             }
 
