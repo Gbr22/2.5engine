@@ -12,7 +12,12 @@ function drawLine(x1,y1,x2,y2){
     ctx.lineTo(x2, y2);
     ctx.stroke();
 }
+
+let resolutionMultiplier = 1/4;
+
 function draw3d(){
+    rayMultiplier = window.innerWidth/fov * resolutionMultiplier;
+
     screenWidth = canvas.width;
     screenHeight = canvas.height;
     screenX = 0;
