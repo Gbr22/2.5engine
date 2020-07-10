@@ -100,7 +100,7 @@ function getColor(tile){
     return colors[tile] || "#cc0099";
 }
 function getImage(tile){
-    return images[tile] || null;
+    return images[tile] || images[0];
 }
 var colors = [
     "transparent",
@@ -110,9 +110,12 @@ var colors = [
     "#ffffff"
 ];
 var images = [
-    
+    "textures/missing.png",
+    "textures/wall.png",
+    "textures/bricks.png",
+    "textures/wood.png",
+    "textures/wall2.png",
 ];
-images[3] = "textures/test.png";
 
 for (let i=0; i<images.length; i++){
     let src = images[i];
