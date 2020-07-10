@@ -476,8 +476,18 @@ function loop(){
     if (fps.length > 10){
         fps.shift();
     }
+    if (mouseMap.get(2)){
+        /* resolutionMultiplier += 0.1; */
+        fov = Math.max(fov-5, 55);
+    } else {
+        /* resolutionMultiplier = Math.max(resolutionMultiplier - 0.5, 1/4); */
+        fov = Math.min(fov+8, 80);
+    }
     requestAnimationFrame(loop);
 }
+document.addEventListener("contextmenu",(e)=>{
+    e.preventDefault();
+})
 function resiz(){
     canvas.width = window.innerWidth*window.devicePixelRatio;
     canvas.height = window.innerHeight*window.devicePixelRatio;
