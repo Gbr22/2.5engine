@@ -12,12 +12,26 @@ function drawLine(x1,y1,x2,y2){
     ctx.lineTo(x2, y2);
     ctx.stroke();
 }
+function draw3d(){
+    screenX = map[0].length*tileSize;
 
+    //top
+    ctx.fillStyle = "#00ccff";
+    ctx.fillRect(screenX,screenY, screenWidth, screenHeight/2);
+
+    //ground
+    ctx.fillStyle = "#666";
+    ctx.fillRect(screenX,screenY+screenHeight/2, screenWidth, screenHeight/2);
+
+    drawRays(player);
+}
 function draw(){
     ctx.fillStyle="#000";
     ctx.fillRect(0,0,canvas.width,canvas.height);
 
     
+
+
 
     for (let y=0; y < map.length; y++){
         for (let x=0; x < map[y].length; x++){
@@ -31,7 +45,9 @@ function draw(){
         }
     }
     player.draw();
-    drawRays(player);
+
+
+    draw3d();
 }
 
 function calcDegOffset(rad){
@@ -74,6 +90,12 @@ var colors = [
 ];
 let fov = 60;
 let rayMultiplier = 1;
+
+let screenHeight = 480;
+let screenWidth = 480;
+let screenX = 0;
+let screenY = 0;
+
 function drawRays(e){
     let [startx,starty] = e.getCenterPos();
     for (let i=-fov/2; i < fov/2; i+=1*rayMultiplier){
@@ -204,8 +226,7 @@ function drawRays(e){
 
             let isHorizontal = hit == horizontal;
 
-            let screenHeight = 480;
-            let screenWidth = 480;
+            
             let maxLineHeight = screenHeight;
             let lH = screenHeight;
             let lineH = Math.min((tileSize*maxLineHeight)/dist, maxLineHeight);
@@ -213,8 +234,7 @@ function drawRays(e){
             if (lineH > screenHeight){
                 lineH = screenHeight;
             }
-            let screenX = map[0].length*tileSize;
-            let screenY = 0;
+            
 
             let tile = GameMap.get(Math.floor(hit.x/tileSize), Math.floor(hit.y/tileSize));
 
