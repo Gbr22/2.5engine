@@ -89,7 +89,7 @@ var colors = [
     "#ffffff"
 ];
 let fov = 60;
-let rayMultiplier = 1;
+let rayMultiplier = 4;
 
 let screenHeight = 480;
 let screenWidth = 480;
@@ -98,7 +98,7 @@ let screenY = 0;
 
 function drawRays(e){
     let [startx,starty] = e.getCenterPos();
-    for (let i=-fov/2; i < fov/2; i+=1*rayMultiplier){
+    for (let i=-fov/2; i < fov/2; i+=1/rayMultiplier){
         function rayCast(horizontal){
             let r = normalize(e.dir  + DR*i + 0.0001 ,CIRCLE);
 
@@ -252,7 +252,7 @@ function drawRays(e){
             
             ctx.fillStyle = `hsl(${color[0]*360}deg, ${color[1]*100}%, ${color[2]*100}%)`;
             
-            ctx.fillRect(screenX+8*(i+fov/2),screenHeight/2-lineH/2,8,lineH);
+            ctx.fillRect(screenX+lineW*(i+fov/2),screenHeight/2-lineH/2,lineW/rayMultiplier,lineH);
             /* ctx.fillStyle = "#666";
             ctx.translate(screenX+8*(i+fov/2),screenHeight/2-lineH/2);
             ctx.rotate(-45 * Math.PI / 180);
