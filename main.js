@@ -294,7 +294,11 @@ function drawRays(e){
             let maxLineHeight = screenHeight;
             let lH = screenHeight;
             let fovPercent = 60/fov;
-            let lineH = Math.min((tileSize*maxLineHeight)/dist, maxLineHeight) * (screenWidth/screenHeight) * fovPercent;
+            let lineH = (tileSize*maxLineHeight)/dist * (screenWidth/screenHeight) * fovPercent;
+            let overSize = (lineH - Math.min(lineH, screenHeight));
+            overSize *= Math.cos(angleDiff);
+            overSize *= Math.cos(angleDiff);
+            
             let lineW = screenWidth/fov;
             if (lineH > screenHeight){
                 lineH = screenHeight;
@@ -330,8 +334,10 @@ function drawRays(e){
                 }
                 let sliceW = 0.0001;
                 let sourceX = (img.width*percent);
+                let over = (img.height*(overSize+screenHeight)/screenHeight-img.height)/2;
+                let sourceY = over;
                 ctx.imageSmoothingEnabled  = false;
-                ctx.drawImage(img,sourceX,0, sliceW,img.height, sx,sy,drawW,drawH);
+                ctx.drawImage(img,sourceX,sourceY, sliceW,img.height-over*2, sx,sy,drawW,drawH);
             } else {
                 ctx.fillStyle = `hsl(${color[0]*360}deg, ${color[1]*100}%, ${color[2]*100}%)`;
                 ctx.fillRect(sx,sy,drawW,drawH);
