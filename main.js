@@ -87,8 +87,9 @@ function drawRays(e){
 
             let hx;
             let hy;
+            let maxiter = map.length+map[0].length;
 
-            while(!hit && iter < 25){
+            while(!hit && iter < maxiter){
                 var [tx, ty] = [Math.floor(x/tileSize),Math.floor(y/tileSize)];
 
                 let [ox,oy] = calcDegOffset(r);
@@ -106,7 +107,7 @@ function drawRays(e){
                 let [rx,ry] = [x-Tx,y-Ty];
 
                 
-                let minadd = 0.1;
+                let minadd = 0.0001;
                 x-= minadd;
                 y-=minadd;
 
@@ -238,11 +239,11 @@ function drawRays(e){
 }
 
 class Player {
-    x = 17.17;
-    y = 15;
+    x = 15.038383834438465;
+    y = 14.396319688204448;
     width = 20;
     height = 20;
-    dir = -Math.PI/2;
+    dir = -1.2915436464748937;
 
     getCenterPos(){
         let [dx,dy] = [this.x*tileSize,this.y*tileSize];
