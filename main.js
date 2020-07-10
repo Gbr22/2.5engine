@@ -56,7 +56,13 @@ function draw(){
             ctx.strokeStyle="#66666688";
             ctx.lineWidth = 1;
             ctx.strokeRect(x*ts, y*ts, ts, ts);
-            ctx.fillRect(x*ts, y*ts, ts, ts);
+            let img = getImage(t);
+            if (t != 0){
+                ctx.drawImage(img,x*ts, y*ts, ts, ts);
+            } else {
+                ctx.fillRect(x*ts, y*ts, ts, ts);
+            }
+            
         }
     }
     player.draw();
