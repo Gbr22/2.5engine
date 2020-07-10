@@ -172,9 +172,7 @@ function drawRays(e){
             }
 
             function diff(a,b){
-                a = a;
-                b = b;
-                return Math.abs(a > b ? a-b : b-a);
+                return Math.abs(a-b);
             }
             let {x,y} = hit;
             let xDiff = diff(startx,x);
@@ -186,18 +184,35 @@ function drawRays(e){
 
         } else {
             let hit = calcDistance(horizontal) < calcDistance(vertical) ? horizontal : vertical;
+
+            if (hit == undefined){
+                console.log("undefined hit");
+                continue;
+            }
+
             ctx.lineWidth = 1;
             ctx.strokeStyle = "#0f0";
 
             let angleDiff = Math.abs(DR*i);
 
-            let dist = calcDistance(hit)*Math.cos(angleDiff);
+            /* let dist = calcDistance(hit); */
+            let dist;
+            {
+                let dx = hit.x-startx;
+                let dy = hit.y-starty;
+                let c = Math.sqrt(dx*dx+dy*dy);
+                dist = c;
+            }
+            
+            dist*=Math.cos(angleDiff);
 
             let isHorizontal = hit == horizontal;
 
             let screenHeight = 350;
             let screenWidth = 480;
-            let lineH = tileSize*screenHeight/dist;
+            let maxLineHeight = screenHeight;
+            let lH = screenHeight;
+            let lineH = Math.min((36*maxLineHeight)/dist, maxLineHeight);
             let lineW = screenWidth/fov;
             if (lineH > screenHeight){
                 lineH = screenHeight;
@@ -212,7 +227,14 @@ function drawRays(e){
             let h=180,s=0.5,l=0.5;
             ctx.fillStyle = getColor(tile);
             
-            ctx.fillRect(screenX+lineW*(i+fov/2),screenY+screenHeight/2-lineH/2,lineW,lineH);
+            ctx.fillRect(screenX+8*(i+fov/2),screenHeight/2-lineH/2,8,lineH);
+            /* ctx.fillStyle = "#666";
+            ctx.translate(screenX+8*(i+fov/2),screenHeight/2-lineH/2);
+            ctx.rotate(-45 * Math.PI / 180);
+            ctx.translate( -(screenX+8*(i+fov/2)),-(screenHeight/2-lineH/2));
+            ctx.fillText(Math.floor(dist),screenX+8*(i+fov/2),screenHeight/2-lineH/2)
+            ctx.setTransform(1, 0, 0, 1, 0, 0); */
+            /* ctx.fillRect(screenX+lineW*(i+fov/2),screenY+screenHeight/2-lineH/2,lineW,lineH); */
 
             drawLine(startx,starty,hit.x,hit.y);
 
@@ -226,8 +248,8 @@ function drawRays(e){
 }
 
 class Player {
-    x = 4.1;
-    y = 4.1;
+    x = 17.17;
+    y = 15;
     width = 20;
     height = 20;
     dir = -Math.PI/2;
