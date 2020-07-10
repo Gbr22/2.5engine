@@ -111,7 +111,7 @@ for (let i=0; i<images.length; i++){
     images[i].src = src;
 }
 
-let fov = 60;
+let fov = 80;
 let rayMultiplier = 4;
 
 let screenHeight = 480;
@@ -252,7 +252,8 @@ function drawRays(e){
             
             let maxLineHeight = screenHeight;
             let lH = screenHeight;
-            let lineH = Math.min((tileSize*maxLineHeight)/dist, maxLineHeight) * screenWidth/screenHeight;
+            let fovPercent = 60/fov;
+            let lineH = Math.min((tileSize*maxLineHeight)/dist, maxLineHeight) * (screenWidth/screenHeight) * fovPercent;
             let lineW = screenWidth/fov;
             if (lineH > screenHeight){
                 lineH = screenHeight;
@@ -275,8 +276,8 @@ function drawRays(e){
              */
             
             
-            let [sx,sy] = [screenX+lineW*(i+fov/2), screenHeight/2-lineH/2];
-            let [drawW, drawH] = [lineW/rayMultiplier,lineH];
+            let [sx,sy] = [Math.floor(screenX+lineW*(i+fov/2)), Math.floor(screenHeight/2-lineH/2)];
+            let [drawW, drawH] = [Math.ceil(lineW/rayMultiplier),Math.floor(lineH)];
 
             let img = getImage(tile);
             if (img){
