@@ -72,13 +72,13 @@ var colors = [
     "blue",
     "white"
 ];
-
+let fov = 60;
+let rayMultiplier = 1;
 function drawRays(e){
     let [startx,starty] = e.getCenterPos();
-    let fov = 60;
-    for (let i=-fov/2; i < fov/2; i+=1){
+    for (let i=-fov/2; i < fov/2; i+=1*rayMultiplier){
         function rayCast(horizontal){
-            let r = normalize(e.dir,CIRCLE) + DR*i;
+            let r = normalize(e.dir  + DR*i + 0.0001 ,CIRCLE);
 
             let [x,y] = [startx,starty];
             let hit = false;
@@ -90,6 +90,7 @@ function drawRays(e){
             let maxiter = map.length+map[0].length;
 
             while(!hit && iter < maxiter){
+
                 var [tx, ty] = [Math.floor(x/tileSize),Math.floor(y/tileSize)];
 
                 let [ox,oy] = calcDegOffset(r);
@@ -152,6 +153,10 @@ function drawRays(e){
                     hx = x;
                     hy = y;
                     break;
+                } else {
+                    /* ctx.lineWidth = 4;
+                    ctx.strokeStyle = "#6600ff";
+                    ctx.strokeRect(x,y,0.01,0.01); */
                 }
                 
 
@@ -239,11 +244,11 @@ function drawRays(e){
 }
 
 class Player {
-    x = 15.038383834438465;
-    y = 14.396319688204448;
+    x = 11.96021999311237;
+    y = 21.913129046178746;
     width = 20;
     height = 20;
-    dir = -1.2915436464748937;
+    dir = 0.02617993877489492;
 
     getCenterPos(){
         let [dx,dy] = [this.x*tileSize,this.y*tileSize];
