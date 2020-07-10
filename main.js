@@ -26,7 +26,17 @@ function draw3d(){
     ctx.fillStyle = "#666";
     ctx.fillRect(screenX,screenY+screenHeight/2, screenWidth, screenHeight/2);
 
-    drawRays(player);
+    let rays = drawRays(player);
+    for (let r of rays){
+        let {startx, starty, hit} = r;
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#0f0";
+        drawLine(startx*minimapSize,starty*minimapSize,hit.x*minimapSize,hit.y*minimapSize);
+
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#6600ff";
+        ctx.strokeRect(hit.x*minimapSize,hit.y*minimapSize,0.01,0.01);
+    }
 }
 let minimapSize = 1/10;
 function draw(){
@@ -123,6 +133,7 @@ let screenY = 0;
 
 function drawRays(e){
     let [startx,starty] = e.getCenterPos();
+    let rays = [];
     for (let i=-fov/2; i < fov/2; i+=1/rayMultiplier){
         function rayCast(horizontal){
             let r = normalize(e.dir  + DR*i + 0.0001 ,CIRCLE);
@@ -233,13 +244,19 @@ function drawRays(e){
         } else {
             let hit = calcDistance(horizontal) < calcDistance(vertical) ? horizontal : vertical;
 
+            rays.push({
+                horizontal,
+                vertical,
+                hit,
+                startx,
+                starty
+            });
+
             if (hit == undefined){
                 console.log("undefined hit");
                 continue;
             }
 
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = "#0f0";
 
             let angleDiff = Math.abs(DR*i);
 
@@ -301,17 +318,11 @@ function drawRays(e){
                 ctx.fillStyle = "rgba(0,0,0,0.2)";
                 ctx.fillRect(sx,sy,drawW,drawH);
             }
-
-            ctx.lineWidth = 1;
-            drawLine(startx*minimapSize,starty*minimapSize,hit.x*minimapSize,hit.y*minimapSize);
-
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = "#6600ff";
-            ctx.strokeRect(hit.x*minimapSize,hit.y*minimapSize,0.01,0.01);
         }
 
 
     }
+    return rays;
 }
 
 class Player {
