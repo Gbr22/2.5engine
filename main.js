@@ -166,19 +166,14 @@ function drawRays(e){
         let horizontal = rayCast(true);
         let vertical = rayCast(false);
 
-        function calcDistance(hit){
-            if (hit == undefined){
+        function calcDistance(h) {
+            if (h == undefined){
                 return Infinity;
             }
-
-            function diff(a,b){
-                return Math.abs(a-b);
-            }
-            let {x,y} = hit;
-            let xDiff = diff(startx,x);
-            let yDiff = diff(starty,y);
-            let d = Math.sqrt(Math.pow(xDiff,2),Math.pow(yDiff),2);
-            return d;
+            let dx = h.x-startx;
+            let dy = h.y-starty;
+            let c = Math.sqrt(dx*dx+dy*dy);
+            return c;
         }
         if (horizontal == undefined && vertical == undefined){
 
@@ -195,14 +190,9 @@ function drawRays(e){
 
             let angleDiff = Math.abs(DR*i);
 
-            /* let dist = calcDistance(hit); */
-            let dist;
-            {
-                let dx = hit.x-startx;
-                let dy = hit.y-starty;
-                let c = Math.sqrt(dx*dx+dy*dy);
-                dist = c;
-            }
+            
+            
+            let dist = calcDistance(hit);
             
             dist*=Math.cos(angleDiff);
 
