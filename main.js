@@ -67,6 +67,9 @@ function normalize(val, max){
     
     return val;
 }
+
+
+
 class _Map {
     get(x,y){
         if (map[y]){
@@ -81,6 +84,9 @@ let GameMap = new _Map();
 function getColor(tile){
     return colors[tile] || "#cc0099";
 }
+function getImage(tile){
+    return images[tile] || null;
+}
 var colors = [
     "#000000",
     "#ff0000",
@@ -88,6 +94,20 @@ var colors = [
     "#0000ff",
     "#ffffff"
 ];
+var images = [
+    
+];
+images[3] = "textures/test.png";
+
+for (let i=0; i<images.length; i++){
+    let src = images[i];
+    if (src == undefined){
+        continue;    
+    }
+    images[i] = new Image();
+    images[i].src = src;
+}
+
 let fov = 60;
 let rayMultiplier = 4;
 
@@ -250,16 +270,27 @@ function drawRays(e){
                 color[2] *= 0.8;
             }
             
-            ctx.fillStyle = `hsl(${color[0]*360}deg, ${color[1]*100}%, ${color[2]*100}%)`;
             
-            ctx.fillRect(screenX+lineW*(i+fov/2),screenHeight/2-lineH/2,lineW/rayMultiplier,lineH);
-            /* ctx.fillStyle = "#666";
-            ctx.translate(screenX+8*(i+fov/2),screenHeight/2-lineH/2);
-            ctx.rotate(-45 * Math.PI / 180);
-            ctx.translate( -(screenX+8*(i+fov/2)),-(screenHeight/2-lineH/2));
-            ctx.fillText(Math.floor(dist),screenX+8*(i+fov/2),screenHeight/2-lineH/2)
-            ctx.setTransform(1, 0, 0, 1, 0, 0); */
-            /* ctx.fillRect(screenX+lineW*(i+fov/2),screenY+screenHeight/2-lineH/2,lineW,lineH); */
+            
+            let [sx,sy] = [screenX+lineW*(i+fov/2), screenHeight/2-lineH/2];
+            let [drawW, drawH] = [lineW/rayMultiplier,lineH];
+
+            let img = getImage(tile);
+            if (img){
+                let percent;
+                if (hit == horizontal){
+                    percent = (hit.x/tileSize-Math.floor(hit.x/tileSize))
+                } else {
+                    percent = (hit.y/tileSize-Math.floor(hit.y/tileSize))
+                }
+                let sliceW = 0.0001;
+                let sourceX = (img.width*percent);
+                ctx.imageSmoothingEnabled  = false;
+                ctx.drawImage(img,sourceX,0, sliceW,img.height, sx,sy,drawW,drawH);
+            } else {
+                ctx.fillStyle = `hsl(${color[0]*360}deg, ${color[1]*100}%, ${color[2]*100}%)`;
+                ctx.fillRect(sx,sy,drawW,drawH);
+            }
 
             drawLine(startx,starty,hit.x,hit.y);
 
