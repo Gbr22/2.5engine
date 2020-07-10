@@ -13,7 +13,10 @@ function drawLine(x1,y1,x2,y2){
     ctx.stroke();
 }
 function draw3d(){
-    screenX = map[0].length*tileSize;
+    screenWidth = canvas.width;
+    screenHeight = canvas.height;
+    screenX = 0;
+    screenY = 0;
 
     //top
     ctx.fillStyle = "#00ccff";
@@ -30,7 +33,7 @@ function draw(){
     ctx.fillRect(0,0,canvas.width,canvas.height);
 
     
-
+    draw3d();
 
 
     for (let y=0; y < map.length; y++){
@@ -38,8 +41,8 @@ function draw(){
             let t = map[y][x];
             
             ctx.fillStyle = getColor(t);
-            ctx.strokeStyle="#666";
-            ctx.lineWidth = 2;
+            ctx.strokeStyle="#66666688";
+            ctx.lineWidth = 1;
             ctx.strokeRect(x*tileSize, y*tileSize, tileSize, tileSize);
             ctx.fillRect(x*tileSize, y*tileSize, tileSize, tileSize);
         }
@@ -47,7 +50,7 @@ function draw(){
     player.draw();
 
 
-    draw3d();
+    
 }
 
 function calcDegOffset(rad){
@@ -88,7 +91,7 @@ function getImage(tile){
     return images[tile] || null;
 }
 var colors = [
-    "#000000",
+    "transparent",
     "#ff0000",
     "#008000",
     "#0000ff",
@@ -249,7 +252,7 @@ function drawRays(e){
             
             let maxLineHeight = screenHeight;
             let lH = screenHeight;
-            let lineH = Math.min((tileSize*maxLineHeight)/dist, maxLineHeight);
+            let lineH = Math.min((tileSize*maxLineHeight)/dist, maxLineHeight) * screenWidth/screenHeight;
             let lineW = screenWidth/fov;
             if (lineH > screenHeight){
                 lineH = screenHeight;
