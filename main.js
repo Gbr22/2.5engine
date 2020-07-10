@@ -2,7 +2,7 @@ let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 
 
-let tileSize=15;
+let tileSize=100;
 
 let CIRCLE = 2*Math.PI;
 
@@ -28,6 +28,7 @@ function draw3d(){
 
     drawRays(player);
 }
+let minimapSize = 1/10;
 function draw(){
     ctx.fillStyle="#000";
     ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -38,13 +39,14 @@ function draw(){
 
     for (let y=0; y < map.length; y++){
         for (let x=0; x < map[y].length; x++){
+            let ts = tileSize*minimapSize;
             let t = map[y][x];
             
             ctx.fillStyle = getColor(t);
             ctx.strokeStyle="#66666688";
             ctx.lineWidth = 1;
-            ctx.strokeRect(x*tileSize, y*tileSize, tileSize, tileSize);
-            ctx.fillRect(x*tileSize, y*tileSize, tileSize, tileSize);
+            ctx.strokeRect(x*ts, y*ts, ts, ts);
+            ctx.fillRect(x*ts, y*ts, ts, ts);
         }
     }
     player.draw();
@@ -300,11 +302,12 @@ function drawRays(e){
                 ctx.fillRect(sx,sy,drawW,drawH);
             }
 
-            drawLine(startx,starty,hit.x,hit.y);
+            ctx.lineWidth = 1;
+            drawLine(startx*minimapSize,starty*minimapSize,hit.x*minimapSize,hit.y*minimapSize);
 
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 3;
             ctx.strokeStyle = "#6600ff";
-            ctx.strokeRect(hit.x,hit.y,0.01,0.01);
+            ctx.strokeRect(hit.x*minimapSize,hit.y*minimapSize,0.01,0.01);
         }
 
 
@@ -314,8 +317,8 @@ function drawRays(e){
 class Player {
     x = 11.96021999311237;
     y = 21.913129046178746;
-    width = 20;
-    height = 20;
+    width = 100;
+    height = 100;
     dir = 0.02617993877489492;
 
     getCenterPos(){
@@ -327,16 +330,16 @@ class Player {
 
     draw(){
         ctx.fillStyle="#f0f";
-        let [dx,dy] = [this.x*tileSize,this.y*tileSize];
-        let [w,h] = [this.width, this.height]
+        let [dx,dy] = [this.x*tileSize*minimapSize,this.y*tileSize*minimapSize];
+        let [w,h] = [this.width*minimapSize, this.height*minimapSize]
         ctx.fillRect(dx,dy, w,h);
         
         let [cx,cy] = [dx+w/2,dy+h/2]
 
-        let [ox,oy] = calcDegOffset(player.dir);
-        let lineLength = 30;
+        let [ox,oy] = calcDegOffset(this.dir);
+        let lineLength = 120*minimapSize;
 
-        ctx.lineWidth = 5;
+        ctx.lineWidth = 50*minimapSize;
         ctx.strokeStyle = "#f0f";
         
         drawLine(cx,cy,cx+ox*lineLength,cy+oy*lineLength);
