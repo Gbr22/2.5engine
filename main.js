@@ -287,8 +287,6 @@ function drawRays(e){
             
             dist*=Math.cos(angleDiff);
 
-            let isHorizontal = hit == horizontal;
-
             
             let maxLineHeight = screenHeight;
             let lH = screenHeight;
@@ -326,10 +324,11 @@ function drawRays(e){
                 } else {
                     percent = (hit.y/tileSize-Math.floor(hit.y/tileSize))
                 }
-                let sliceW = 0.0001;
-                let sourceX = (img.width*percent);
+                let sliceW = 1;
+                let sourceX = Math.min(Math.floor(img.width*percent), img.width);
                 let sourceY = 0;
                 ctx.imageSmoothingEnabled  = false;
+                
                 ctx.drawImage(img,sourceX,sourceY, sliceW,img.height, sx,sy,drawW,drawH);
             } else {
                 ctx.fillStyle = `hsl(${color[0]*360}deg, ${color[1]*100}%, ${color[2]*100}%)`;
@@ -409,7 +408,7 @@ onmousemove = function(e){
     let dy = e.movementY;
 
     if (mouse.locked){
-        player.dir += DR*0.5*dx;
+        player.dir += dx * 0.002;
     }
 
     mouse.x = e.clientX;
@@ -431,7 +430,6 @@ function calc(){
         let [k, value] = e;
         if (value == true){
             let c = String.fromCharCode(k).toLowerCase();
-            let turnspeed = 5;
             let [ox,oy] = calcDegOffset(player.dir);
             let [rox, roy] = calcDegOffset(player.dir-Math.PI/2);
             let map = {
