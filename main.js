@@ -1,6 +1,5 @@
 let canvas = document.getElementById("canvas");
-let ctx = canvas.getContext("2d");
-
+let ctx = canvas.getContext("2d", { alpha: false });
 
 let tileSize=100;
 
@@ -13,7 +12,7 @@ function drawLine(x1,y1,x2,y2){
     ctx.stroke();
 }
 
-let resolutionMultiplier = 0.2;
+let resolutionMultiplier = 1/5;
 
 function draw3d(){
     rayMultiplier = window.innerWidth/fov * resolutionMultiplier;
@@ -23,6 +22,13 @@ function draw3d(){
     screenX = 0;
     screenY = 0;
 
+    let rayCastTime = performance.now();
+    let rays = castRays(player);
+    rayCastTime = performance.now() - rayCastTime;
+    infoMenu.rayCastTime = rayCastTime;
+
+    let rayDrawTime = performance.now();
+
     //top
     ctx.fillStyle = "#00ccff";
     ctx.fillRect(screenX,screenY, screenWidth, screenHeight/2);
@@ -31,10 +37,12 @@ function draw3d(){
     ctx.fillStyle = "#666";
     ctx.fillRect(screenX,screenY+screenHeight/2, screenWidth, screenHeight/2);
 
-    let rays = castRays(player);
     rays.forEach(e=>{
         drawHit(e);
     })
+    rayDrawTime = performance.now() - rayDrawTime;
+    infoMenu.rayDrawTime = rayDrawTime;
+
     for (let r of rays){
         let {startx, starty, hit} = r;
         ctx.lineWidth = 1;
@@ -48,6 +56,11 @@ function draw3d(){
 }
 let fps = [];
 let minimapSize = 1/10;
+
+let infoMenu={
+    fps:0,
+}
+
 function draw(){
     ctx.fillStyle="#000";
     ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -76,15 +89,23 @@ function draw(){
     }
     player.draw();
 
-    let fontSize = 30;
-    ctx.font = `${fontSize}px Arial`;
+    let fontSize = 25;
+    ctx.font = `${fontSize}px monospace`;
     ctx.fillStyle = "yellow";
     let sum = 0;
     for (let e of fps){
         sum+=e;
     }
     let avgfps = sum/fps.length;
-    ctx.fillText(Math.floor(avgfps),0,fontSize);
+    infoMenu.fps = avgfps;
+    let index = 0;
+    [...Object.entries(infoMenu)].forEach(([key,value])=>{
+        let text = `${key}: ${value}\n`;
+        ctx.fillText(text,0,((index+1)*fontSize)+(tileSize*minimapSize)*map.length );
+        index++;
+    })
+    
+    
 }
 
 function calcDegOffset(rad){
@@ -169,14 +190,14 @@ function calcDistance(h,startx,starty) {
 
 function drawHit({hit,startx,starty,i}) {
 
-
+    infoMenu.drawCalcTime = performance.now();
     let angleDiff = Math.abs(DR*i);
 
     
     
     let dist = calcDistance(hit,startx,starty);
-    
     dist*=Math.cos(angleDiff);
+    
 
     
     let maxLineHeight = screenHeight;
@@ -221,7 +242,9 @@ function drawHit({hit,startx,starty,i}) {
         let sourceY = 0;
         ctx.imageSmoothingEnabled  = false;
         
+        infoMenu.drawSliceTime = performance.now();
         ctx.drawImage(img,sourceX,sourceY, sliceW,img.height, sx,sy,drawW,drawH);
+        infoMenu.drawSliceTime = (performance.now() - infoMenu.drawSliceTime) * 1000;
     } else {
         ctx.fillStyle = `hsl(${color[0]*360}deg, ${color[1]*100}%, ${color[2]*100}%)`;
         ctx.fillRect(sx,sy,drawW,drawH);
@@ -230,7 +253,11 @@ function drawHit({hit,startx,starty,i}) {
         ctx.fillStyle = "rgba(0,0,0,0.2)";
         ctx.fillRect(sx,sy,drawW,drawH);
     }
+    infoMenu.drawCalcTime = (performance.now()-infoMenu.drawCalcTime) * 1000;
 }
+
+
+
 
 function castRays(e){
     let [startx,starty] = e.getCenterPos();
