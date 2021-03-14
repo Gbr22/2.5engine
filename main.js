@@ -31,7 +31,10 @@ function draw3d(){
     ctx.fillStyle = "#666";
     ctx.fillRect(screenX,screenY+screenHeight/2, screenWidth, screenHeight/2);
 
-    let rays = drawRays(player);
+    let rays = castRays(player);
+    rays.forEach(e=>{
+        drawHit(e);
+    })
     for (let r of rays){
         let {startx, starty, hit} = r;
         ctx.lineWidth = 1;
@@ -153,7 +156,83 @@ let screenHeight = 480;
 let screenWidth = 480;
 let screenX = 0;
 let screenY = 0;
-function drawRays(e){
+
+function calcDistance(h,startx,starty) {
+    if (h == undefined){
+        return Infinity;
+    }
+    let dx = h.x-startx;
+    let dy = h.y-starty;
+    let c = Math.sqrt(dx*dx+dy*dy);
+    return c;
+}
+
+function drawHit({hit,startx,starty,i}) {
+
+
+    let angleDiff = Math.abs(DR*i);
+
+    
+    
+    let dist = calcDistance(hit,startx,starty);
+    
+    dist*=Math.cos(angleDiff);
+
+    
+    let maxLineHeight = screenHeight;
+    let lH = screenHeight;
+    let fovPercent = 60/fov;
+    let lineH = (tileSize*maxLineHeight)/dist * (screenWidth/screenHeight) * fovPercent;
+    
+    let lineW = screenWidth/fov;
+    
+
+    let tile = GameMap.get(Math.floor(hit.x/tileSize), Math.floor(hit.y/tileSize));
+
+    
+    /* ctx.fillRect(screenX,screenY,screenWidth,screenHeight); */
+    let color = getColor(tile);
+    
+    color = hexToRgb(color);
+    
+    color = rgbToHsl(...color);
+
+    /* if (hit == horizontal){
+        color[2] *= 0.8;
+    }
+     */
+    
+    
+    let [sx,sy] = [Math.floor(screenX+lineW*(i+fov/2)), Math.floor(screenHeight/2-lineH/2)];
+    
+    let [drawW, drawH] = [Math.ceil(lineW/rayMultiplier),Math.floor(lineH)];
+
+    let img = getImage(tile);
+    if (img){
+        let percent;
+        if (hit.horizontal){
+            percent = (hit.x/tileSize-Math.floor(hit.x/tileSize))
+        } else {
+            percent = (hit.y/tileSize-Math.floor(hit.y/tileSize))
+        }
+        percent = 1-percent;
+        let sliceW = 1;
+        let sourceX = Math.min(Math.floor(img.width*percent), img.width);
+        let sourceY = 0;
+        ctx.imageSmoothingEnabled  = false;
+        
+        ctx.drawImage(img,sourceX,sourceY, sliceW,img.height, sx,sy,drawW,drawH);
+    } else {
+        ctx.fillStyle = `hsl(${color[0]*360}deg, ${color[1]*100}%, ${color[2]*100}%)`;
+        ctx.fillRect(sx,sy,drawW,drawH);
+    }
+    if (hit.horizontal){
+        ctx.fillStyle = "rgba(0,0,0,0.2)";
+        ctx.fillRect(sx,sy,drawW,drawH);
+    }
+}
+
+function castRays(e){
     let [startx,starty] = e.getCenterPos();
     let rays = [];
     for (let i=-fov/2; i < fov/2; i+=1/rayMultiplier){
@@ -247,17 +326,8 @@ function drawRays(e){
         let horizontal = rayCast(true);
         let vertical = rayCast(false);
 
-        
-
-
-        function calcDistance(h) {
-            if (h == undefined){
-                return Infinity;
-            }
-            let dx = h.x-startx;
-            let dy = h.y-starty;
-            let c = Math.sqrt(dx*dx+dy*dy);
-            return c;
+        function calcDist(h) {
+            return calcDistance(h,startx,starty);
         }
 
         let allHits = [horizontal,vertical].flat();
@@ -267,7 +337,7 @@ function drawRays(e){
             let isShortestOnTile = true;
             allHits.forEach(f=>{
                 if (e.tx == f.tx && e.ty == f.ty){
-                    if (calcDistance(f) < calcDistance(e)){
+                    if (calcDist(f) < calcDist(e)){
                         isShortestOnTile = false;
                     }
                 }
@@ -277,83 +347,17 @@ function drawRays(e){
             }
         })
         hitList.sort((a,b)=>{
-            return calcDistance(b) - calcDistance(a);
+            return calcDist(b) - calcDist(a);
         });
-        
-        
-        function drawHit(hit) {
-            rays.push({
-                hit,
-                startx,
-                starty
-            });
-
-
-            let angleDiff = Math.abs(DR*i);
-
-            
-            
-            let dist = calcDistance(hit);
-            
-            dist*=Math.cos(angleDiff);
-
-            
-            let maxLineHeight = screenHeight;
-            let lH = screenHeight;
-            let fovPercent = 60/fov;
-            let lineH = (tileSize*maxLineHeight)/dist * (screenWidth/screenHeight) * fovPercent;
-            
-            let lineW = screenWidth/fov;
-            
-
-            let tile = GameMap.get(Math.floor(hit.x/tileSize), Math.floor(hit.y/tileSize));
-
-            
-            /* ctx.fillRect(screenX,screenY,screenWidth,screenHeight); */
-            let color = getColor(tile);
-            
-            color = hexToRgb(color);
-            
-            color = rgbToHsl(...color);
-
-            /* if (hit == horizontal){
-                color[2] *= 0.8;
-            }
-             */
-            
-            
-            let [sx,sy] = [Math.floor(screenX+lineW*(i+fov/2)), Math.floor(screenHeight/2-lineH/2)];
-            
-            let [drawW, drawH] = [Math.ceil(lineW/rayMultiplier),Math.floor(lineH)];
-
-            let img = getImage(tile);
-            if (img){
-                let percent;
-                if (hit.horizontal){
-                    percent = (hit.x/tileSize-Math.floor(hit.x/tileSize))
-                } else {
-                    percent = (hit.y/tileSize-Math.floor(hit.y/tileSize))
-                }
-                percent = 1-percent;
-                let sliceW = 1;
-                let sourceX = Math.min(Math.floor(img.width*percent), img.width);
-                let sourceY = 0;
-                ctx.imageSmoothingEnabled  = false;
-                
-                ctx.drawImage(img,sourceX,sourceY, sliceW,img.height, sx,sy,drawW,drawH);
-            } else {
-                ctx.fillStyle = `hsl(${color[0]*360}deg, ${color[1]*100}%, ${color[2]*100}%)`;
-                ctx.fillRect(sx,sy,drawW,drawH);
-            }
-            if (hit.horizontal){
-                ctx.fillStyle = "rgba(0,0,0,0.2)";
-                ctx.fillRect(sx,sy,drawW,drawH);
-            }
-        }
-        
+        let index = i;
         for (let i = 0; i < hitList.length; i++) {
             const e = hitList[i];
-            drawHit(e);
+            rays.push({
+                hit:e,
+                startx,
+                starty,
+                i:index,
+            });
         }
     }
     return rays;
