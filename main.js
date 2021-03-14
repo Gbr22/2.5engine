@@ -13,7 +13,7 @@ function drawLine(x1,y1,x2,y2){
     ctx.stroke();
 }
 
-let resolutionMultiplier = 1/4;
+let resolutionMultiplier = 0.2;
 
 function draw3d(){
     rayMultiplier = window.innerWidth/fov * resolutionMultiplier;
@@ -134,6 +134,7 @@ var images = [
     "textures/bricks.png",
     "textures/wood.png",
     "textures/wall2.png",
+    "textures/glass.png",
 ];
 
 for (let i=0; i<images.length; i++){
@@ -160,15 +161,15 @@ function drawRays(e){
             let r = normalize(e.dir  + DR*i + 0.0001 ,CIRCLE);
 
             let [x,y] = [startx,starty];
-            let hit = false;
             let iter = 0;
             let stepSize = tileSize;
 
             let hx;
             let hy;
             let maxiter = map.length+map[0].length;
-
-            while(!hit && iter < maxiter){
+            let hits = [];
+            let transparent = true;
+            while(iter < maxiter && transparent){
 
                 var [tx, ty] = [Math.floor(x/tileSize),Math.floor(y/tileSize)];
 
@@ -194,7 +195,6 @@ function drawRays(e){
                 let tau = Math.PI/2;
                 let _3P2 = 3*Math.PI/2;
 
-                let hits = [];
 
                 if (r != 0 && r != Math.PI && horizontal){ //up down
                     let d = r > Math.PI ? 1 : -1;
@@ -228,10 +228,11 @@ function drawRays(e){
                 }
                 var [tx, ty] = [Math.floor(x/tileSize),Math.floor(y/tileSize)];
                 if (GameMap.get(tx,ty) > 0){
-                    hit = true;
-                    hx = x;
-                    hy = y;
-                    break;
+                    let o = {x,y,tx,ty,horizontal};
+                    hits.push(o);
+                    if (GameMap.get(tx,ty) != 5){
+                        transparent = false;
+                    }
                 } else {
                     /* ctx.lineWidth = 4;
                     ctx.strokeStyle = "#6600ff";
@@ -241,15 +242,13 @@ function drawRays(e){
 
                 iter++;
             }
-            if (hit){
-                return {
-                    x:hx,
-                    y:hy,
-                }
-            }
+            return hits;
         }
         let horizontal = rayCast(true);
         let vertical = rayCast(false);
+
+        
+
 
         function calcDistance(h) {
             if (h == undefined){
@@ -260,23 +259,34 @@ function drawRays(e){
             let c = Math.sqrt(dx*dx+dy*dy);
             return c;
         }
-        if (horizontal == undefined && vertical == undefined){
 
-        } else {
-            let hit = calcDistance(horizontal) < calcDistance(vertical) ? horizontal : vertical;
-
+        let allHits = [horizontal,vertical].flat();
+        let hitList = [];
+        /* console.log(allHits); */
+        allHits.forEach(e=>{
+            let isShortestOnTile = true;
+            allHits.forEach(f=>{
+                if (e.tx == f.tx && e.ty == f.ty){
+                    if (calcDistance(f) < calcDistance(e)){
+                        isShortestOnTile = false;
+                    }
+                }
+            })
+            if (isShortestOnTile){
+                hitList.push(e);
+            }
+        })
+        hitList.sort((a,b)=>{
+            return calcDistance(b) - calcDistance(a);
+        });
+        
+        
+        function drawHit(hit) {
             rays.push({
-                horizontal,
-                vertical,
                 hit,
                 startx,
                 starty
             });
-
-            if (hit == undefined){
-                console.log("undefined hit");
-                continue;
-            }
 
 
             let angleDiff = Math.abs(DR*i);
@@ -319,11 +329,12 @@ function drawRays(e){
             let img = getImage(tile);
             if (img){
                 let percent;
-                if (hit == horizontal){
+                if (hit.horizontal){
                     percent = (hit.x/tileSize-Math.floor(hit.x/tileSize))
                 } else {
                     percent = (hit.y/tileSize-Math.floor(hit.y/tileSize))
                 }
+                percent = 1-percent;
                 let sliceW = 1;
                 let sourceX = Math.min(Math.floor(img.width*percent), img.width);
                 let sourceY = 0;
@@ -334,23 +345,26 @@ function drawRays(e){
                 ctx.fillStyle = `hsl(${color[0]*360}deg, ${color[1]*100}%, ${color[2]*100}%)`;
                 ctx.fillRect(sx,sy,drawW,drawH);
             }
-            if (hit == horizontal){
+            if (hit.horizontal){
                 ctx.fillStyle = "rgba(0,0,0,0.2)";
                 ctx.fillRect(sx,sy,drawW,drawH);
             }
         }
-
-
+        
+        for (let i = 0; i < hitList.length; i++) {
+            const e = hitList[i];
+            drawHit(e);
+        }
     }
     return rays;
 }
 
 class Player {
-    x = 11.96021999311237;
-    y = 21.913129046178746;
+    x = 13.30159275989973;
+    y = 5.569917163381888;
     width = 100;
     height = 100;
-    dir = 0.02617993877489492;
+    dir = -0.11982006122510389;
 
     getCenterPos(){
         let [dx,dy] = [this.x*tileSize,this.y*tileSize];
@@ -423,7 +437,7 @@ onkeydown = function(e){
     keyMap.set(k,true);
 }
 
-let DR = 0.01745329252;
+let DR = Math.PI/180; //degree * DR = radian
 
 function calc(){
     for (let e of keyMap.entries()){
@@ -494,7 +508,7 @@ let map = [
 	[1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1],
 	[1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,3,0,0,0,3,0,0,0,1],
 	[1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1],
-	[1,0,0,0,0,0,2,2,0,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1],
+	[1,0,0,0,0,0,2,2,0,2,2,0,0,0,0,5,0,3,0,3,0,0,0,1],
 	[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
 	[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
 	[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -509,9 +523,9 @@ let map = [
 	[1,4,0,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
 	[1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
 	[1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-	[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+	[1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1]
 ]
-for (let y=0; y < map.length; y++){
+/* for (let y=0; y < map.length; y++){
     for (let x=0; x < map[y].length; x++){
         if (y == 0 || y == map.length-1){
             map[y] = new Array(map[y].length).fill(1);
@@ -522,7 +536,7 @@ for (let y=0; y < map.length; y++){
         
     }
 }
-
+ */
 
 function init(){
     resiz();
@@ -532,6 +546,5 @@ init();
 
 
 window.onresize = function(){
-    console.log("resize");
     resiz();
 }
